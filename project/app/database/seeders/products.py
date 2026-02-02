@@ -10,11 +10,20 @@ import hashlib
 
 fake = Faker()
 
+
 def hash_filename(name: str) -> str:
     return hashlib.sha256(name.encode()).hexdigest()
 
-def generate_gradient_image(file_name: str, base_folder: str, original_width: int = 1000, original_height: int = 1000):
-    random_image = np.random.randint(0, 256, (original_height, original_width, 3), dtype=np.uint8)
+
+def generate_gradient_image(
+    file_name: str,
+    base_folder: str,
+    original_width: int = 1000,
+    original_height: int = 1000,
+):
+    random_image = np.random.randint(
+        0, 256, (original_height, original_width, 3), dtype=np.uint8
+    )
     img = Image.fromarray(random_image)
     draw = ImageDraw.Draw(img)
 
@@ -22,37 +31,40 @@ def generate_gradient_image(file_name: str, base_folder: str, original_width: in
     shape_color = tuple(random.randint(0, 255) for _ in range(3))
     center_x, center_y = original_width // 2, original_height // 2
 
-    shape_type = random.choice(['circle', 'square', 'triangle'])
-    if shape_type == 'circle':
+    shape_type = random.choice(["circle", "square", "triangle"])
+    if shape_type == "circle":
         draw.ellipse(
-            [(center_x - shape_size // 2, center_y - shape_size // 2),
-             (center_x + shape_size // 2, center_y + shape_size // 2)],
-            fill=shape_color
+            [
+                (center_x - shape_size // 2, center_y - shape_size // 2),
+                (center_x + shape_size // 2, center_y + shape_size // 2),
+            ],
+            fill=shape_color,
         )
-    elif shape_type == 'square':
+    elif shape_type == "square":
         draw.rectangle(
-            [(center_x - shape_size // 2, center_y - shape_size // 2),
-             (center_x + shape_size // 2, center_y + shape_size // 2)],
-            fill=shape_color
+            [
+                (center_x - shape_size // 2, center_y - shape_size // 2),
+                (center_x + shape_size // 2, center_y + shape_size // 2),
+            ],
+            fill=shape_color,
         )
-    elif shape_type == 'triangle':
+    elif shape_type == "triangle":
         points = [
             (center_x, center_y - shape_size // 2),
             (center_x - shape_size // 2, center_y + shape_size // 2),
-            (center_x + shape_size // 2, center_y + shape_size // 2)
+            (center_x + shape_size // 2, center_y + shape_size // 2),
         ]
         draw.polygon(points, fill=shape_color)
 
     sizes = [(500, 500), (100, 100), (1000, 1000), (10, 10)]
-    
+
     for size in sizes:
         size_folder = os.path.join(base_folder, f"{size[0]}x{size[1]}")
         os.makedirs(size_folder, exist_ok=True)
 
         resized_img = img.resize(size, Image.Resampling.LANCZOS)
 
-        resized_img.save(os.path.join(size_folder, f"{file_name}.png"), format='PNG')
-
+        resized_img.save(os.path.join(size_folder, f"{file_name}.png"), format="PNG")
 
 
 async def seed_products(db: Session, num_products: int, batch_size: int = 1000):
@@ -62,7 +74,7 @@ async def seed_products(db: Session, num_products: int, batch_size: int = 1000):
     category_ids = [c.id for c in categories]
     supplier_ids = [s.id for s in suppliers]
     products_to_add = []
-    
+
     name_count = {}
 
     async for _ in tqdm(range(num_products), desc="Seeding Products"):
@@ -88,7 +100,7 @@ async def seed_products(db: Session, num_products: int, batch_size: int = 1000):
             category_id=fake.random_element(elements=category_ids),
             supplier_id=fake.random_element(elements=supplier_ids),
             quantity=fake.random_number(digits=2),
-            photo_path=f"{hashed_name}.png"
+            photo_path=f"{hashed_name}.png",
         )
         products_to_add.append(product)
 

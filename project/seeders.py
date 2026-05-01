@@ -9,14 +9,11 @@ from PIL import Image
 from io import BytesIO
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-from fastapi import Depends
 from faker import Faker
 from tqdm.asyncio import tqdm
 from dotenv import load_dotenv
-from app.database.database import get_db
 from app.database.seeders.categories import seed_categories
 from app.database.seeders.suppliers import seed_suppliers
-from app.database.seeders.orders import seed_orders
 from app.database.tables import (
     Category,
     Supplier,
@@ -239,12 +236,10 @@ async def seed_products_from_internet(db: Session, num_products: int):
         os.makedirs(photo_folder, exist_ok=True)
 
         # Search and download image from Pexels by product name
-        print(f"Searching image for: {product_name}")
         image_url = await search_pexels_image(base_name)
 
         success = False
         if image_url:
-            print(f"Found: {image_url[:60]}...")
             success = await download_image_from_url(
                 image_url, hashed_name, photo_folder
             )
